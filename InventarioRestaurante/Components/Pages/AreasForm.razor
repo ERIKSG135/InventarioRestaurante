@@ -1,0 +1,70 @@
+﻿@page "/areas/nueva"
+@page "/areas/editar/{Id:int}"
+@rendermode InteractiveServer
+
+@inject NavigationManager _navigator;
+@inject IRepositorioAreas _repositorio;
+
+<h2>@_mensaje Area</h2>
+
+<EditForm Model="_area" FormName="frmArea" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+
+    <div class="row mb-3">
+        <label for="txtNombre" class="col-2 col-form-label">Nombre</label>
+        <div class="col-10">
+            <InputText id="txtNombre" class="form-control" @bind-Value="_area.Nombre" />
+            <ValidationMessage For="()=>_area.Nombre" />
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <label for="txtEncargado" class="col-2 col-form-label">Encargado</label>
+        <div class="col-10">
+            <InputText id="txtEncargado" class="form-control" @bind-Value="_area.Encargado" />
+            <ValidationMessage For="()=>_area.Encargado" />
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Guardar</button>
+    <button class="btn btn-danger ms-3" @onclick="Cancelar" @onclick:preventDefault>Cancelar</button>
+
+</EditForm>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    private string _mensaje = "";
+    private Area _area = new Area();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id > 0)
+        {
+            _area = await _repositorio.Get(Id);
+            _mensaje = "Modificar";
+        }
+        else
+        {
+            _mensaje = "Nuevo";
+        }
+    }
+
+    private async Task Guardar()
+    {
+        if (Id > 0)
+        {
+            await _repositorio.Update(Id, _area);
+        }
+        else
+        {
+            await _repositorio.Add(_area);
+        }
+        Cancelar();
+    }
+
+    private void Cancelar()
+    {
+        _navigator.NavigateTo("/areas");
+    }
+}
